@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Mapa con OpenStreetMap</title>
+   <link rel="stylesheet" href="styles.css">
+   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+   <h1>Sistema de busqueda de una dirección en OpenStreetMap</h1>
+   <input type="text" id="direccion" placeholder="Ingresa una dirección">
+   <button onclick="buscarUbicacion()">Buscar</button>
+   <div id="map"></div>
+
+   <script>
+let map; // Variable global para el mapa
+
+function buscarUbicacion() {
+   const direccion = document.getElementById("direccion").value;
+   fetch(`http://localhost:3000/geocode?address=${direccion}`)
+   .then(response => response.json())
+   .then(data => {
+      if (data.latitud && data.longitud) {
+         mostrarMapa(data.latitud, data.longitud);
+      } else {
+         alert("Dirección no encontrada");
+      }
+   })
+   .catch(error => console.log("Error:", error));
+}
+
+function mostrarMapa(lat, lon) {
+   if (!map) { // Si el mapa no está inicializado, créalo
+      map = L.map('map').setView([lat, lon], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+         attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+   } else { // Si ya está creado, solo actualiza la vista
+      map.setView([lat, lon], 13);
+   }
+
+   L.marker([lat, lon]).addTo(map)
+      .bindPopup("Ubicación encontrada")
+      .openPopup();
+}
+
+   </script>
+</body>
+</html>
